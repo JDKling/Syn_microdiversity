@@ -13,35 +13,41 @@ if conda env list | grep -q 'dl_data'; then
   echo "dl_data environment is installed, checking to see if we have our raw data"
 else
   echo "Setting up the dl_data environment"
-  conda create -y -f CONDA-ENVS/env0.yml -n dl_data
+  conda create -y -n dl_data
   conda activate dl_data
   conda install -y -c conda-forge -c bioconda -c defaults -c astrobiomike entrez-direct sra-tools bit
 fi
 
-if ls RAW/*fq.gz
-mkdir RAW
-cd RAW
-SAMN=$(grep 'short_read' sra_accessions.txt | cut -f2)
-STRAIN=$(grep 'short_read' sra_accessions.txt | cut -f1)
-#ONT_SAMN=
-#ONT_STRAIN=
-REF_ACC=$(cut -f2 refseq_accessions.txt)
-REF_STRAIN=$(cut -f1 refseq_accessions.txt)
+if [ ! -d RAW ]; then
+  conda activate dl_data
+  echo "RAW directory does not exist"
+  mkdir RAW
+  cd RAW
+  SAMN=$(grep 'short_read' ../sra_accessions.txt | cut -f2)
+  STRAIN=$(grep 'short_read' ../sra_accessions.txt | cut -f1)
+  #ONT_SAMN=
+  #ONT_STRAIN=
+  REF_ACC=$(cut -f2 ../refseq_accessions.txt)
+  REF_STRAIN=$(cut -f1 ../refseq_accessions.txt)
 
-## Download short reads
-count=0
-for acc in ${SAMN[@]}
-do
-  if [ ! -f "${STRAIN[$count]}_1.fq.gz" ]
-  then
-      echo "$0: File '${STRAIN[$count]}' not found."
-      echo 'now downloading' ${STRAIN[$count]}
-      esearch -db sra -query $acc  | efetch --format runinfo | cut -d ',' -f 1 | grep SRR | xargs -n 1 -P 12 fastq-dump --split-files --gzip
-      mv SRR*_1.fastq.gz ${STRAIN[$count]}_1.fq.gz
-      mv SRR*_2.fastq.gz ${STRAIN[$count]}_2.fq.gz
-  fi
-count=$(expr $count + 1)
-done
+  ## Download short reads
+  count=0
+  for acc in ${SAMN[@]}
+  do
+    if [ ! -f "${STRAIN[$count]}_1.fq.gz" ]
+    then
+        echo "$0: File '${STRAIN[$count]}' not found."
+        echo 'now downloading' ${STRAIN[$count]}
+        esearch -db sra -query $acc  | efetch --format runinfo | cut -d ',' -f 1 | grep SRR | xargs -n 1 -P 12 fastq-dump --split-files --gzip
+        mv SRR*_1.fastq.gz ${STRAIN[$count]}_1.fq.gz
+        mv SRR*_2.fastq.gz ${STRAIN[$count]}_2.fq.gz
+    fi
+    count=$(expr $count + 1)
+  done
+  conda deactivate
+else
+  echo "RAW directory exists"
+fi
 
 ## Download ONT reads
 
