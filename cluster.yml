@@ -1,0 +1,20 @@
+__default__:
+	account: dahutch_441
+	cpus: 16
+	time: 01:30:00
+	mem: 24g
+
+only_syn_norm:
+	mem: 100g
+	cpus: 16
+	time: 02:00:00
+
+only_syn_assemble:
+	mem: 60g
+	time: 03:00:00
+	cpus: 16
+
+humann_profile:
+	time: 03:00:00
+	mem: 70g
+	cpus: 16
