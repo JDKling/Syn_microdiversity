@@ -8,8 +8,9 @@ exec 3>&1 4>&2
 trap 'exec 2>&4 1>&3' 0 1 2 3
 exec 1>LOGS/DL_data_log.out 2>&1
 
-# init conda
-conda init bash
+# initiate conda
+module purge
+eval "$(conda shell.bash hook)"
 
 # create and environment that will let us download the raw seq data we are interested in
 if conda env list | grep -q 'env0'; then
