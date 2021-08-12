@@ -8,6 +8,9 @@ exec 3>&1 4>&2
 trap 'exec 2>&4 1>&3' 0 1 2 3
 exec 1>LOGS/DL_data_log.out 2>&1
 
+# init conda
+conda init bash
+
 # create and environment that will let us download the raw seq data we are interested in
 if conda env list | grep -q 'env0'; then
   echo "dl_data environment is installed, checking to see if we have our raw data"
@@ -20,10 +23,10 @@ fi
 if [ ! -d DATA/RAW ]; then
   conda activate dl_data
   echo "RAW directory does not exist"
-  mkdir RAW
-  cd RAW
-  SAMN=$(grep 'short_read' ../sra_accessions.txt | cut -f2)
-  STRAIN=$(grep 'short_read' ../sra_accessions.txt | cut -f1)
+  mkdir DATA/RAW
+  cd DATA/RAW
+  SAMN=$(grep 'short_read' ../../sra_accessions.txt | cut -f2)
+  STRAIN=$(grep 'short_read' ../../sra_accessions.txt | cut -f1)
 
   ## Download short reads
   count=0
@@ -39,6 +42,7 @@ if [ ! -d DATA/RAW ]; then
     fi
     count=$(expr $count + 1)
   done
+  cd ../..
   conda deactivate
 else
   echo "RAW directory exists"
@@ -66,8 +70,8 @@ if [ ! -d DATA/REF ]; then
   mkdir DATA/REF
 
   # get accession and strain name
-  REF_ACC=$(grep 'reference' ../refseq_accessions.txt | cut -f3)
-  REF_STRAIN=$(grep 'reference' ../refseq_accessions.txt | cut -f1)
+  REF_ACC=$(grep 'reference' refseq_accessions.txt | cut -f3)
+  REF_STRAIN=$(grep 'reference' refseq_accessions.txt | cut -f1)
   cat $REF_ACC > tmp_acc.txt
 
   # Download genome
@@ -83,10 +87,10 @@ if conda env list | grep -q 'env3'; then
   echo "anvio-7 environment is installed, let's look at some pangenomes!"
 else
   echo "Looks like Anvi'o isn't setup yet. Hold on, this is going to take a while..."
-  conda env create -f CONDA-ENVS/env3.yaml -n anvio-7
-  conda activate anvio-7
+  conda env create -f CONDA-ENVS/env3.yaml
+  conda activate env3
   # need to install the actual anvio package from their website
-  cd ../DBs
+  cd DBs
   curl -L https://github.com/merenlab/anvio/releases/download/v7/anvio-7.tar.gz --output anvio-7.tar.gz
   pip install anvio-7.tar.gz
 
