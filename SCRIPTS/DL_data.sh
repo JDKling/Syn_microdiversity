@@ -67,7 +67,7 @@ fi
 
 #Download reference genome
 if [ ! -d DATA/REF ]; then
-  conda activate dl_data
+  conda activate env0
   mkdir DATA/REF
 
   # get accession and strain name
@@ -88,7 +88,7 @@ if conda env list | grep -q 'env3'; then
   echo "anvio-7 environment is installed, let's look at some pangenomes!"
 else
   echo "Looks like Anvi'o isn't setup yet. Hold on, this is going to take a while..."
-  conda env create -f CONDA-ENVS/env3.yaml
+  conda env create -f CONDA-ENVS/env3.yml
   conda activate env3
   # need to install the actual anvio package from their website
   cd DBs
@@ -115,13 +115,13 @@ else
   cd DBs
   # humann
   echo "Downloading humann databases... this is gonna take a sec..."
-  mkdir humann_db
+  mkdir -p humann_db
   humann_databases --download chocophlan full humann_db --update-config yes
   humann_databases --download uniref uniref90_diamond humann_db --update-config yes
   humann_databases --download utility_mapping full humann_db --update-config yes
 
   # metaphlann
-  mkdir metaphlan_db
+  mkdir -p metaphlan_db
   metaphlan --install --index mpa_v30_CHOCOPhlAn_201901 --bowtie2db metaphlan_db
   # need to install metaphlan dbs outside of SNAKEMAKE
   ## /scratch/joshuakl/syn_final/.snakemake/conda/0eea8dbb/bin/metaphlan --install --index mpa_v30_CHOCOPhlAn_201901 --bowtie2db metaphlan_db
