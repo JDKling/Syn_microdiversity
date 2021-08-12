@@ -1,0 +1,54 @@
+name: env2
+channels:
+  - biobakery
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - _libgcc_mutex=0.1=conda_forge
+  - _openmp_mutex=4.5=1_gnu
+  - boost=1.70.0=py38h9de70de_1
+  - boost-cpp=1.70.0=h7b93d67_3
+  - bzip2=1.0.8=h7f98852_4
+  - ca-certificates=2021.5.30=ha878542_0
+  - capnproto=0.6.1=hfc679d8_1
+  - certifi=2021.5.30=py38h578d9bd_0
+  - fastani=1.32=he1c1bb9_0
+  - fasttree=2.1.10=h779adbc_5
+  - gsl=2.6=he838d99_2
+  - harvesttools=1.2=h139f625_1
+  - icu=67.1=he1b5a44_0
+  - ld_impl_linux-64=2.36.1=hea4e1c9_2
+  - libblas=3.9.0=10_openblas
+  - libcblas=3.9.0=10_openblas
+  - libffi=3.3=h58526e2_2
+  - libgcc-ng=11.1.0=hc902ee8_6
+  - libgfortran-ng=11.1.0=h69a702a_6
+  - libgfortran5=11.1.0=h6c583b3_6
+  - libgomp=11.1.0=hc902ee8_6
+  - liblapack=3.9.0=10_openblas
+  - libopenblas=0.3.17=pthreads_h8fe5266_1
+  - libstdcxx-ng=11.1.0=h56837e0_6
+  - llvm-openmp=8.0.1=hc9558a2_0
+  - lz4-c=1.9.3=h9c3ff4c_1
+  - mash=2.3=he348c14_1
+  - ncurses=6.2=h58526e2_4
+  - numpy=1.21.1=py38h9894fe3_0
+  - openmp=8.0.1=0
+  - openssl=1.1.1k=h7f98852_0
+  - parsnp=1.5.6=h9a82719_0
+  - phipack=1.1=h779adbc_1
+  - pip=21.2.2=pyhd8ed1ab_0
+  - python=3.8.10=h49503c6_1_cpython
+  - python_abi=3.8=2_cp38
+  - raxml=8.2.12=h779adbc_3
+  - readline=8.1=h46c0cb4_0
+  - setuptools=49.6.0=py38h578d9bd_3
+  - sqlite=3.36.0=h9cd32fc_0
+  - tk=8.6.10=h21135ba_1
+  - wheel=0.36.2=pyhd3deb0d_0
+  - xz=5.2.5=h516909a_1
+  - zlib=1.2.11=h516909a_1010
+  - zstd=1.4.9=ha95c52a_0
+prefix: /home1/joshuakl/.conda/envs/testenv
+
