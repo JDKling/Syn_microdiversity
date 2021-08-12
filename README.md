@@ -9,7 +9,7 @@ Many HPCs using slurm do not let you access the internet within a cluster. This 
 
 I would use a screen for this because some of the databases take a while to download.
 ```{bash}
- bash SCRIPTS/DL_data.sh
+bash SCRIPTS/DL_data.sh
 ```
 
 In addition to making sure all of the reads for the samples listed in the sra_accessions.txt file are downloaded into DATA/RAW/ it will also install any conda environments that will need to be run outside of the snakemake framework (e.g. the epigenomics pipeline here).
@@ -28,4 +28,4 @@ conda deactivate
 ```
 
 ### Epigenomics
-INSTRUCTIONS COMING SOON 
+INSTRUCTIONS COMING SOON
