@@ -17,7 +17,7 @@ if conda env list | grep -q 'env0'; then
   echo "env0 environment is installed, checking to see if we have our raw data"
 else
   echo "Setting up the env0 environment"
-  conda create -y -f CONDA-ENVS/env0.yml
+  conda env create -y -f CONDA-ENVS/env0.yml
 fi
 
 # download sequence reads
@@ -68,7 +68,7 @@ fi
 #Download reference genome
 if [ ! -d DATA/REF ]; then
   conda activate env0
-  mkdir DATA/REF
+  mkdir -p DATA/REF
 
   # get accession and strain name
   REF_ACC=$(grep 'reference' refseq_accessions.txt | cut -f3)
@@ -109,7 +109,7 @@ if conda env list | grep -q 'env4'; then
   echo "Phlann is setup."
 else
   echo "Phlann is not setup, installing from conda."
-  conda create -y -f CONDA-ENVS/env4.yml python=3.7
+  conda env create -y -f CONDA-ENVS/env4.yml python=3.7
   # Setup phlan data bases
   conda activate env4
   cd DBs
@@ -134,7 +134,7 @@ if conda env list | grep -q 'env5'; then
   echo "All programs for gene calling and annotation is setup."
 else
   echo "Installing packages for gene calling and annotation"
-  conda create -y -f CONDA-ENVS/env5.yml
+  conda env create -y -f CONDA-ENVS/env5.yml
   # get kofamscan DBs
   wget ftp://ftp.genome.jp/pub/db/kofam/ko_list.gz
   gunzip -c ko_list.gz > DBs/
@@ -149,7 +149,7 @@ if conda env list | grep -q 'env6'; then
   echo "All programs for calling methylation sites is setup."
 else
   echo "Installing packages for calling methylation sites"
-  conda create -y -f CONDA-ENVS/env6.yml
+  conda env create -y -f CONDA-ENVS/env6.yml
 fi
 
 # r
@@ -157,5 +157,5 @@ if conda env list | grep -q 'env7'; then
   echo "R and all packages that you will need are setup."
 else
   echo "Installing R and all of the packages you will need"
-  conda create -y -f CONDA-ENVS/env7.yml
+  conda env create -y -f CONDA-ENVS/env7.yml
 fi
