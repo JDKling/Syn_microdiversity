@@ -14,17 +14,17 @@ eval "$(conda shell.bash hook)"
 
 # create and environment that will let us download the raw seq data we are interested in
 if conda env list | grep -q 'env0'; then
-  echo "dl_data environment is installed, checking to see if we have our raw data"
+  echo "env0 environment is installed, checking to see if we have our raw data"
 else
-  echo "Setting up the dl_data environment"
+  echo "Setting up the env0 environment"
   conda create -y -f CONDA-ENVS/env0.yml
 fi
 
 # download sequence reads
 if [ ! -d DATA/RAW ]; then
-  conda activate dl_data
+  conda activate env0
   echo "RAW directory does not exist"
-  mkdir DATA/RAW
+  mkdir -p DATA/RAW
   cd DATA/RAW
   SAMN=$(grep 'short_read' ../../sra_accessions.txt | cut -f2)
   STRAIN=$(grep 'short_read' ../../sra_accessions.txt | cut -f1)
@@ -53,7 +53,7 @@ fi
 if [ ! -d DATA/RAW/JTC_unzip_fast5 ]; then
   # Download fast5 files (this takes a while, definitely open a screen)
   fileid="19T7YU0aWuZyN6WggQdslsP1VmzYL8BAW"
-  filename="DATA/ONT/raw_ONT_fast5.tar.gz"
+  filename="DATA/RAW/raw_ONT_fast5.tar.gz"
   curl -c ./cookie -s -L "https://drive.google.com/uc?export=download&id=${fileid}" > /dev/null
   curl -Lb ./cookie "https://drive.google.com/uc?export=download&confirm=`awk '/download/ {print $NF}' ./cookie`&id=${fileid}" -o ${filename}
   tar -xzvf raw_ONT_fast5.tar.gz
