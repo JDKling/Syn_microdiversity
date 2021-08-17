@@ -3,7 +3,11 @@ import pandas as pd
 # Pull sample names
 with open('sra_accessions.txt','r') as file:
     tmp=pd.read_csv(file, sep = '\t', header = None)
-    SAMPLES = tmp[tmp[2] == 'short_read'][0].tolist()
+    tmp_SAMPLES = tmp[tmp[2] == 'short_read'][0].tolist()
+    SAMPLES = []
+    for i in tmp_SAMPLES:
+        j = i.replace(' ','')
+        SAMPLES.append(j)
 
 # Pull reference sample name
 with open('refseq_accessions.txt','r') as ref:
@@ -15,9 +19,9 @@ with open('refseq_accessions.txt','r') as ref:
 
 rule all:
     input:
-        'SYN_PARSNP/parsnp.tree',
-        'METAPHLAN/metaphlan_merged_abundance_table.txt','METAPHLAN/metaphlan_full_taxonomy.csv',
-        'HUMANN/merged_pathabundance.tsv','HUMANN/merged_genefamilies_cpm.tsv','HUMANN/merged_pathcoverage.tsv'
+        'DATA/SYN_PARSNP/parsnp.tree',
+        'DATA/METAPHLAN/metaphlan_merged_abundance_table.txt','DATA/METAPHLAN/metaphlan_full_taxonomy.csv',
+        'DATA/HUMANN/merged_pathabundance.tsv','DATA/HUMANN/merged_genefamilies_cpm.tsv','DATA/HUMANN/merged_pathcoverage.tsv'
 
 rule clean:
     input:
@@ -106,7 +110,7 @@ rule parsnp:
         assemblies=expand('DATA/SPADES_SYN/{sample}_spades_contigs.fa',sample=SAMPLES),
         ref_LA31='DATA/REF/'+name+'_ref_genome.fa'
     conda:'env2.yml'
-    log: "LOGS/{sample}_parsnp.log"
+    log: "LOGS/Parsnp.log"
     output:'DATA/SYN_PARSNP/parsnp.tree'
     shell:
         'mkdir -p DATA/SYN_PARSNP && cp {input.assemblies} DATA/SYN_PARSNP/ && parsnp -r {input.ref_LA31} -d DATA/SYN_PARSNP -p 16 -o tmp_parsnp_out 2> {log} &&'
@@ -153,7 +157,7 @@ rule metaphlan_profile:
 rule metaphlan_merge:
     input:expand('DATA/METAPHLAN/{sample}_metaphlan_profile.txt',sample=SAMPLES)
     conda:'env4.yml'
-    log: "LOGS/metaphlan_merge.log"
+    log: "LOGS/Metaphlan_merge.log"
     output:'DATA/METAPHLAN/metaphlan_merged_abundance_table.txt'
     shell:
         'merge_metaphlan_tables.py {input} > {output} 2> {log}'
@@ -161,7 +165,7 @@ rule metaphlan_merge:
 rule metaphlan_convert_table:
     input:'DATA/METAPHLAN/metaphlan_merged_abundance_table.txt'
     conda:'env0.yml'
-    log: "LOGS/metaphlan_convert_table.log"
+    log: "LOGS/Metaphlan_convert_table.log"
     output:
         spp_tab='DATA/METAPHLAN/merged_abundance_table_species.txt',
         sum_tab='DATA/METAPHLAN/merged_abundance_summary.csv'
@@ -175,14 +179,14 @@ rule metaphlan_convert_table:
 rule metaphlan_full_tax:
     input:'DATA/METAPHLAN/metaphlan_merged_abundance_table.txt'
     output:'DATA/METAPHLAN/metaphlan_full_taxonomy.csv'
-    log: "LOGS/metaphlan_full_tax.log"
+    log: "LOGS/Metaphlan_full_tax.log"
     shell:
         "grep 's__' {input} | cut -f1 | sed 's/|.__/,/g' | sed 's/k__//' > {output} 2> {log}"
 
 rule metaphlan_hclust:
     input:'DATA/METAPHLAN/merged_abundance_table_species.txt'
     conda:'env4.yml'
-    log: "LOGS/metaphlan_hclust.log"
+    log: "LOGS/Metaphlan_hclust.log"
     output:'DATA/METAPHLAN/abundance_heatmap_species.png'
     shell:
         'hclust2.py -i {input} -o {output} --ftop 25 --f_dist_f braycurtis --s_dist_f braycurtis --cell_aspect_ratio 0.5 -l --flabel_size 6 --slabel_size 6 --max_flabel_len 100 --max_slabel_len 100 --minv 0.1 --dpi 300 2> {log}'
@@ -192,7 +196,7 @@ rule humann_profile:
         R1='DATA/CLEAN/{sample}_qual_R1.fq.gz',
         R2='DATA/CLEAN/{sample}_qual_R2.fq.gz'
     conda:'env4.yml'
-    log: "LOGS/humann_profile.log"
+    log: "LOGS/{sample}_humann_profile.log"
     output:
         pathcov='DATA/HUMANN/{sample}_pathcoverage.tsv',
         pathabund='DATA/HUMANN/{sample}_pathabundance.tsv',
@@ -206,7 +210,7 @@ rule humann_profile:
 rule humann_merge_cpm:
     input:expand('DATA/HUMANN/{sample}_genefamilies.tsv',sample=SAMPLES)
     conda:'env4.yml'
-    log: "LOGS/humann_merge_cpm.log"
+    log: "LOGS/Humann_merge_cpm.log"
     output:'DATA/HUMANN/merged_genefamilies.tsv'
     shell:
         'touch {input} && '
@@ -215,7 +219,7 @@ rule humann_merge_cpm:
 rule humann_norm_merged_table:
     input:'DATA/HUMANN/merged_genefamilies.tsv'
     conda:'env4.yml'
-    log: "LOGS/humann_norm_merged_table.log"
+    log: "LOGS/Humann_norm_merged_table.log"
     output:'DATA/HUMANN/merged_genefamilies_cpm.tsv'
     shell:
         'humann_renorm_table --input {input} --output {output} 2> {log}'
@@ -223,7 +227,7 @@ rule humann_norm_merged_table:
 rule humann_merge_coverage:
     input:expand('DATA/HUMANN/{sample}_pathcoverage.tsv',sample=SAMPLES)
     conda:'env4.yml'
-    log: "LOGS/humann_merge_coverage.log"
+    log: "LOGS/Humann_merge_coverage.log"
     output:'HUMANN/merged_pathcoverage.tsv'
     shell:
         'touch {input} && '
@@ -232,7 +236,7 @@ rule humann_merge_coverage:
 rule humann_merge_abundance:
     input:expand('DATA/HUMANN/{sample}_pathabundance.tsv',sample=SAMPLES)
     conda:'env4.yml'
-    log: "LOGS/humann_merge_abundance.log"
+    log: "LOGS/Humann_merge_abundance.log"
     output:'DATA/HUMANN/merged_pathabundance.tsv'
     shell:
         'touch {input} && '
