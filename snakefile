@@ -22,13 +22,15 @@ rule all:
         expand('DATA/UNMAP_BAM/{sample}_unmapped.bam', sample=SAMPLES),
         expand('DATA/NOTSYN_READS/{sample}_notSyn1.fq', sample=SAMPLES), expand('DATA/NOTSYN_READS/{sample}_notSyn2.fq', sample=SAMPLES),
         expand('DATA/METAPHLAN/{sample}_metaphlan_profile.txt', sample=SAMPLES), expand('DATA/METAPHLAN/{sample}_metaphlan.bowtie2.bz2', sample=SAMPLES),
-        'DATA/METAPHLAN/merged_abundance_table_species.txt', 'DATA/METAPHLAN/merged_abundance_summary.csv',
+        'DATA/METAPHLAN/abundance_table_species.txt', 'DATA/METAPHLAN/abundance_summary.csv',
         'DATA/METAPHLAN/metaphlan_full_taxonomy.csv',
         'DATA/METAPHLAN/abundance_heatmap_species.png',
         expand('DATA/HUMANN/{sample}_pathcoverage.tsv', sample=SAMPLES), expand('DATA/HUMANN/{sample}_pathabundance.tsv', sample=SAMPLES), expand('DATA/HUMANN/{sample}_genefamilies.tsv', sample=SAMPLES),
-        'DATA/HUMANN/merged_genefamilies.tsv',
-        'DATA/METAPHLAN/metaphlan_merged_abundance_table.txt', 'DATA/METAPHLAN/metaphlan_full_taxonomy.csv',
-        'DATA/HUMANN/merged_pathabundance.tsv', 'DATA/HUMANN/merged_genefamilies_cpm.tsv', 'DATA/HUMANN/merged_pathcoverage.tsv'
+        'DATA/HUMANN/genefamilies.tsv',
+        'DATA/METAPHLAN/metaphlan_abundance_table.txt', 'DATA/METAPHLAN/metaphlan_full_taxonomy.csv',
+        'DATA/HUMANN/pathabundance.tsv', 'DATA/HUMANN/genefamilies_cpm.tsv', 'DATA/HUMANN/pathcoverage.tsv'
+
+
 
 rule clean:
     input:
@@ -165,17 +167,17 @@ rule metaphlan_merge:
     input:expand('DATA/METAPHLAN/{sample}_metaphlan_profile.txt',sample=SAMPLES)
     conda:'env4.yml'
     log: "LOGS/Metaphlan_merge.log"
-    output:'DATA/METAPHLAN/metaphlan_merged_abundance_table.txt'
+    output:'DATA/METAPHLAN/metaphlan_abundance_table.txt'
     shell:
         'merge_metaphlan_tables.py {input} > {output} 2> {log}'
 
 rule metaphlan_convert_table:
-    input:'DATA/METAPHLAN/metaphlan_merged_abundance_table.txt'
+    input:'DATA/METAPHLAN/metaphlan_abundance_table.txt'
     conda:'env0.yml'
     log: "LOGS/Metaphlan_convert_table.log"
     output:
-        spp_tab='DATA/METAPHLAN/merged_abundance_table_species.txt',
-        sum_tab='DATA/METAPHLAN/merged_abundance_summary.csv'
+        spp_tab='DATA/METAPHLAN/abundance_table_species.txt',
+        sum_tab='DATA/METAPHLAN/abundance_summary.csv'
     shell:
         "grep -E 's__|clade' {input} | sed 's/^.*s__//g' | cut -f1,3-14 | sed -e 's/clade_name/strain/g' | sed 's/_metaphlan_profile//g' > tmp.txt && "
         #"grep -E 'UNKNOWN' {input} | cut -f1,3-14 >> tmp.txt && "
@@ -184,14 +186,14 @@ rule metaphlan_convert_table:
         "touch {output.sum_tab}"
 
 rule metaphlan_full_tax:
-    input:'DATA/METAPHLAN/metaphlan_merged_abundance_table.txt'
+    input:'DATA/METAPHLAN/metaphlan_abundance_table.txt'
     output:'DATA/METAPHLAN/metaphlan_full_taxonomy.csv'
     log: "LOGS/Metaphlan_full_tax.log"
     shell:
         "grep 's__' {input} | cut -f1 | sed 's/|.__/,/g' | sed 's/k__//' > {output} 2> {log}"
 
 rule metaphlan_hclust:
-    input:'DATA/METAPHLAN/merged_abundance_table_species.txt'
+    input:'DATA/METAPHLAN/abundance_table_species.txt'
     conda:'env4.yml'
     log: "LOGS/Metaphlan_hclust.log"
     output:'DATA/METAPHLAN/abundance_heatmap_species.png'
@@ -218,16 +220,16 @@ rule humann_merge_cpm:
     input:expand('DATA/HUMANN/{sample}_genefamilies.tsv',sample=SAMPLES)
     conda:'env4.yml'
     log: "LOGS/Humann_merge_cpm.log"
-    output:'DATA/HUMANN/merged_genefamilies.tsv'
+    output:'DATA/HUMANN/genefamilies.tsv'
     shell:
         'touch {input} && '
         'humann_join_table --input HUMANN --output {output} --file_name _genefamilies 2> {log}'
 
-rule humann_norm_merged_table:
-    input:'DATA/HUMANN/merged_genefamilies.tsv'
+rule humann_norm_table:
+    input:'DATA/HUMANN/genefamilies.tsv'
     conda:'env4.yml'
-    log: "LOGS/Humann_norm_merged_table.log"
-    output:'DATA/HUMANN/merged_genefamilies_cpm.tsv'
+    log: "LOGS/Humann_norm_table.log"
+    output:'DATA/HUMANN/genefamilies_cpm.tsv'
     shell:
         'humann_renorm_table --input {input} --output {output} 2> {log}'
 
@@ -235,7 +237,7 @@ rule humann_merge_coverage:
     input:expand('DATA/HUMANN/{sample}_pathcoverage.tsv',sample=SAMPLES)
     conda:'env4.yml'
     log: "LOGS/Humann_merge_coverage.log"
-    output:'HUMANN/merged_pathcoverage.tsv'
+    output:'HUMANN/pathcoverage.tsv'
     shell:
         'touch {input} && '
         'humann_join_table --input humann_out --output {output} --file_name pathcoverage 2> {log}'
@@ -244,7 +246,7 @@ rule humann_merge_abundance:
     input:expand('DATA/HUMANN/{sample}_pathabundance.tsv',sample=SAMPLES)
     conda:'env4.yml'
     log: "LOGS/Humann_merge_abundance.log"
-    output:'DATA/HUMANN/merged_pathabundance.tsv'
+    output:'DATA/HUMANN/pathabundance.tsv'
     shell:
         'touch {input} && '
         'humann_join_table --input HUMANN --output {output} --file_name pathabundance 2> {log}'
