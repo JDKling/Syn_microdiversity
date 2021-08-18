@@ -14,12 +14,24 @@ with open('refseq_accessions.txt','r') as ref:
     tmp_name = pd.read_csv(ref, sep = '\t', header = None)
     name = str(tmp_name[tmp_name[1] == 'reference'][0].tolist()[0])
 
-#SAMPLES=['LA31','LA3','LA21','LA20','LA27','LA29','LA101','LA103','LA117','LA126','LA127']
-#SCRIPTS='SCRIPTS'
-
 rule all:
     input:
+        expand('DATA/CLEAN/{sample}_qual_R1.fq.gz', sample=SAMPLES),expand('DATA/CLEAN/{sample}_qual_R2.fq.gz', sample=SAMPLES)
+        'DATA/REF/contigs.1.bt2',
+        expand('DATA/SAM/{sample}_syn.sam', sample=SAMPLES),
+        expand('DATA/MAP_BAM/{sample}_mapped.bam', sample=SAMPLES),
+        exapnd('DATA/SYN_READS/{sample}_onlySyn1.fq',sample=SAMPLES),
+        expand('DATA/SYN_READS_NORM/{sample}_norm_onlySyn1.fq',sample=SAMPLES),expand('DATA/SYN_READS_NORM/{sample}_norm_onlySyn2.fq',sample=SAMPLES),
+        expand('DATA/SPADES_SYN/{sample}_spades_contigs.fa', sample=SAMPLES),
         'DATA/SYN_PARSNP/parsnp.tree',
+        expand('DATA/UNMAP_BAM/{sample}_unmapped.bam', sample=SAMPLES),
+        expand('DATA/NOTSYN_READS/{sample}_notSyn1.fq', sample=SAMPLES),expand('DATA/NOTSYN_READS/{sample}_notSyn2.fq', sample=SAMPLES),
+        expand('DATA/METAPHLAN/{sample}_metaphlan_profile.txt', sample=SAMPLES), expand('DATA/METAPHLAN/{sample}_metaphlan.bowtie2.bz2', sample=SAMPLES),
+        'DATA/METAPHLAN/merged_abundance_table_species.txt','DATA/METAPHLAN/merged_abundance_summary.csv',
+        'DATA/METAPHLAN/metaphlan_full_taxonomy.csv',
+        'DATA/METAPHLAN/abundance_heatmap_species.png',
+        expand('DATA/HUMANN/{sample}_pathcoverage.tsv', sample=SAMPLES), expand('DATA/HUMANN/{sample}_pathabundance.tsv', sample=SAMPLES),expand('DATA/HUMANN/{sample}_genefamilies.tsv', sample=SAMPLES),
+        'DATA/HUMANN/merged_genefamilies.tsv',
         'DATA/METAPHLAN/metaphlan_merged_abundance_table.txt','DATA/METAPHLAN/metaphlan_full_taxonomy.csv',
         'DATA/HUMANN/merged_pathabundance.tsv','DATA/HUMANN/merged_genefamilies_cpm.tsv','DATA/HUMANN/merged_pathcoverage.tsv'
 
@@ -51,7 +63,7 @@ rule syn_map:
     input:
         R1='DATA/CLEAN/{sample}_qual_R1.fq.gz',
         R2='DATA/CLEAN/{sample}_qual_R2.fq.gz',
-        ind='REF/contigs.1.bt2'
+        ind='DATA/REF/contigs.1.bt2'
     params:'REF/'+name+'_index'
     log: "LOGS/{sample}_syn_map.log"
     conda:'env1.yml'
