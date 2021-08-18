@@ -36,7 +36,7 @@ rule clean:
     input:
         R1='DATA/RAW/{sample}_1.fq.gz',
         R2='DATA/RAW/{sample}_2.fq.gz'
-    conda:'env1.yml'
+    conda:'CONDA-ENVS/env1.yml'
     log: "LOGS/{sample}_clean.log"
     output:
         R1='DATA/CLEAN/{sample}_qual_R1.fq.gz',
@@ -47,7 +47,7 @@ rule clean:
 
 rule remove_syn_ind:
     input:'DATA/REF/'+name+'_ref_genome.fa'
-    conda:'env1.yml'
+    conda:'CONDA-ENVS/env1.yml'
     params:'DATA/REF/'+name+'_index'
     log: "LOGS/remove_syn_ind.log"
     output:'DATA/REF/contigs.1.bt2'
@@ -63,7 +63,7 @@ rule syn_map:
         ind='DATA/REF/contigs.1.bt2'
     params:'REF/'+name+'_index'
     log: "LOGS/{sample}_syn_map.log"
-    conda:'env1.yml'
+    conda:'CONDA-ENVS/env1.yml'
     output:'DATA/SAM/{sample}_syn.sam'
     shell:
         'touch {input.ind} && mkdir -p DATA/SAM && bowtie2 --threads 16 -x {params}/contigs -1 {input.R1} -2 {input.R2} -S {output} 2> {log}'
@@ -72,7 +72,7 @@ rule syn_map:
 
 rule only_syn_mapped:
     input:'DATA/SAM/{sample}_syn.sam'
-    conda: 'env1.yml'
+    conda: 'CONDA-ENVS/env1.yml'
     log: "LOGS/{sample}_only_syn_mapped.log"
     output:'DATA/MAP_BAM/{sample}_mapped.bam'
     shell:
@@ -80,7 +80,7 @@ rule only_syn_mapped:
 
 rule only_syn_subset:
     input:'DATA/MAP_BAM/{sample}_mapped.bam'
-    conda:'env1.yml'
+    conda:'CONDA-ENVS/env1.yml'
     log: "LOGS/{sample}_only_syn_subset.log"
     output:
         R1='DATA/SYN_READS/{sample}_onlySyn1.fq',
@@ -92,7 +92,7 @@ rule only_syn_norm:
     input:
         R1='DATA/SYN_READS/{sample}_onlySyn1.fq',
         R2='DATA/SYN_READS/{sample}_onlySyn2.fq'
-    conda:'env1.yml'
+    conda:'CONDA-ENVS/env1.yml'
     log: "LOGS/{sample}_only_syn_norm.log"
     output:
         R1='DATA/SYN_READS_NORM/{sample}_norm_onlySyn1.fq',
@@ -107,7 +107,7 @@ rule only_syn_assembly:
     input:
         R1='DATA/SYN_READS_NORM/{sample}_norm_onlySyn1.fq',
         R2='DATA/SYN_READS_NORM/{sample}_norm_onlySyn2.fq'
-    conda:'env1.yml'
+    conda:'CONDA-ENVS/env1.yml'
     log: "LOGS/{sample}_only_syn_assembly.log"
     output:'DATA/SPADES_SYN/{sample}_spades_contigs.fa'
     shell:
@@ -118,7 +118,7 @@ rule parsnp:
     input:
         assemblies=expand('DATA/SPADES_SYN/{sample}_spades_contigs.fa',sample=SAMPLES),
         ref_LA31='DATA/REF/'+name+'_ref_genome.fa'
-    conda:'env2.yml'
+    conda:'CONDA-ENVS/env2.yml'
     log: "LOGS/Parsnp.log"
     output:'DATA/SYN_PARSNP/parsnp.tree'
     shell:
@@ -129,7 +129,7 @@ rule parsnp:
 
 rule remove_syn_bam:
     input:'DATA/SAM/{sample}_syn.sam'
-    conda:'env1.yml'
+    conda:'CONDA-ENVS/env1.yml'
     log: "LOGS/{sample}_remove_syn_bam.log"
     output:'DATA/UNMAP_BAM/{sample}_unmapped.bam'
     shell:
@@ -139,7 +139,7 @@ rule remove_syn_bam:
 rule remove_syn_subset:
     input:
         bam='DATA/UNMAP_BAM/{sample}_unmapped.bam'
-    conda:'env1.yml'
+    conda:'CONDA-ENVS/env1.yml'
     log: "LOGS/{sample}_remove_syn_subset.log"
     output:
         R1='DATA/NOTSYN_READS/{sample}_notSyn1.fq',
@@ -152,7 +152,7 @@ rule metaphlan_profile:
     input:
         R1='DATA/CLEAN/{sample}_qual_R1.fq.gz',
         R2='DATA/CLEAN/{sample}_qual_R2.fq.gz'
-    conda:'env4.yml'
+    conda:'CONDA-ENVS/env4.yml'
     log: "LOGS/{sample}_metaphlan_profile.log"
     output:
         metaP='DATA/METAPHLAN/{sample}_metaphlan_profile.txt',
@@ -165,7 +165,7 @@ rule metaphlan_profile:
 
 rule metaphlan_merge:
     input:expand('DATA/METAPHLAN/{sample}_metaphlan_profile.txt',sample=SAMPLES)
-    conda:'env4.yml'
+    conda:'CONDA-ENVS/env4.yml'
     log: "LOGS/Metaphlan_merge.log"
     output:'DATA/METAPHLAN/metaphlan_abundance_table.txt'
     shell:
@@ -173,7 +173,7 @@ rule metaphlan_merge:
 
 rule metaphlan_convert_table:
     input:'DATA/METAPHLAN/metaphlan_abundance_table.txt'
-    conda:'env0.yml'
+    conda:'CONDA-ENVS/env0.yml'
     log: "LOGS/Metaphlan_convert_table.log"
     output:
         spp_tab='DATA/METAPHLAN/abundance_table_species.txt',
@@ -194,7 +194,7 @@ rule metaphlan_full_tax:
 
 rule metaphlan_hclust:
     input:'DATA/METAPHLAN/abundance_table_species.txt'
-    conda:'env4.yml'
+    conda:'CONDA-ENVS/env4.yml'
     log: "LOGS/Metaphlan_hclust.log"
     output:'DATA/METAPHLAN/abundance_heatmap_species.png'
     shell:
@@ -204,7 +204,7 @@ rule humann_profile:
     input:
         R1='DATA/CLEAN/{sample}_qual_R1.fq.gz',
         R2='DATA/CLEAN/{sample}_qual_R2.fq.gz'
-    conda:'env4.yml'
+    conda:'CONDA-ENVS/env4.yml'
     log: "LOGS/{sample}_humann_profile.log"
     output:
         pathcov='DATA/HUMANN/{sample}_pathcoverage.tsv',
@@ -218,7 +218,7 @@ rule humann_profile:
 
 rule humann_merge_cpm:
     input:expand('DATA/HUMANN/{sample}_genefamilies.tsv',sample=SAMPLES)
-    conda:'env4.yml'
+    conda:'CONDA-ENVS/env4.yml'
     log: "LOGS/Humann_merge_cpm.log"
     output:'DATA/HUMANN/genefamilies.tsv'
     shell:
@@ -227,7 +227,7 @@ rule humann_merge_cpm:
 
 rule humann_norm_table:
     input:'DATA/HUMANN/genefamilies.tsv'
-    conda:'env4.yml'
+    conda:'CONDA-ENVS/env4.yml'
     log: "LOGS/Humann_norm_table.log"
     output:'DATA/HUMANN/genefamilies_cpm.tsv'
     shell:
@@ -235,16 +235,16 @@ rule humann_norm_table:
 
 rule humann_merge_coverage:
     input:expand('DATA/HUMANN/{sample}_pathcoverage.tsv',sample=SAMPLES)
-    conda:'env4.yml'
+    conda:'CONDA-ENVS/env4.yml'
     log: "LOGS/Humann_merge_coverage.log"
-    output:'HUMANN/pathcoverage.tsv'
+    output:'DATA/HUMANN/pathcoverage.tsv'
     shell:
         'touch {input} && '
         'humann_join_table --input humann_out --output {output} --file_name pathcoverage 2> {log}'
 
 rule humann_merge_abundance:
     input:expand('DATA/HUMANN/{sample}_pathabundance.tsv',sample=SAMPLES)
-    conda:'env4.yml'
+    conda:'CONDA-ENVS/env4.yml'
     log: "LOGS/Humann_merge_abundance.log"
     output:'DATA/HUMANN/pathabundance.tsv'
     shell:
