@@ -1,6 +1,6 @@
 import pandas as pd
 
-SAMPLES = glob.wildcards("DATA/RAW/{sample}_1.fq.gz")
+SAMPLES, = glob_wildcards("DATA/RAW/{sample}_1.fq.gz")
 print(SAMPLES)
 
 # Pull reference sample name
@@ -10,6 +10,7 @@ with open('refseq_accessions.txt','r') as ref:
 
 rule all:
     input:
+        expand('DATA/RAW/{sample}_1.fq.gz', sample=SAMPLES), expand('DATA/RAW/{sample}_2.fq.gz', sample=SAMPLES),
         expand('DATA/CLEAN/{sample}_qual_R1.fq.gz', sample=SAMPLES), expand('DATA/CLEAN/{sample}_qual_R2.fq.gz', sample=SAMPLES),
         'DATA/REF/contigs.1.bt2',
         expand('DATA/SAM/{sample}_syn.sam', sample=SAMPLES),
