@@ -1,13 +1,7 @@
 import pandas as pd
 
-# Pull sample names
-with open('sra_accessions.txt','r') as file:
-    tmp=pd.read_csv(file, sep = '\t', header = None)
-    tmp_SAMPLES = tmp[tmp[2] == 'short_read'][0].tolist()
-    SAMPLES = []
-    for i in tmp_SAMPLES:
-        j = i.replace(' ','')
-        SAMPLES.append(j)
+SAMPLES = glob.wildcards("DATA/RAW/{sample}_1.fq.gz")
+print(SAMPLES)
 
 # Pull reference sample name
 with open('refseq_accessions.txt','r') as ref:
@@ -16,24 +10,24 @@ with open('refseq_accessions.txt','r') as ref:
 
 rule all:
     input:
-        expand('DATA/CLEAN/{sample}_qual_R1.fq.gz', sample=SAMPLES),expand('DATA/CLEAN/{sample}_qual_R2.fq.gz', sample=SAMPLES)
+        expand('DATA/CLEAN/{sample}_qual_R1.fq.gz', sample=SAMPLES), expand('DATA/CLEAN/{sample}_qual_R2.fq.gz', sample=SAMPLES),
         'DATA/REF/contigs.1.bt2',
         expand('DATA/SAM/{sample}_syn.sam', sample=SAMPLES),
         expand('DATA/MAP_BAM/{sample}_mapped.bam', sample=SAMPLES),
-        exapnd('DATA/SYN_READS/{sample}_onlySyn1.fq',sample=SAMPLES),
-        expand('DATA/SYN_READS_NORM/{sample}_norm_onlySyn1.fq',sample=SAMPLES),expand('DATA/SYN_READS_NORM/{sample}_norm_onlySyn2.fq',sample=SAMPLES),
+        expand('DATA/SYN_READS/{sample}_onlySyn1.fq',sample=SAMPLES),
+        expand('DATA/SYN_READS_NORM/{sample}_norm_onlySyn1.fq',sample=SAMPLES), expand('DATA/SYN_READS_NORM/{sample}_norm_onlySyn2.fq',sample=SAMPLES),
         expand('DATA/SPADES_SYN/{sample}_spades_contigs.fa', sample=SAMPLES),
         'DATA/SYN_PARSNP/parsnp.tree',
         expand('DATA/UNMAP_BAM/{sample}_unmapped.bam', sample=SAMPLES),
-        expand('DATA/NOTSYN_READS/{sample}_notSyn1.fq', sample=SAMPLES),expand('DATA/NOTSYN_READS/{sample}_notSyn2.fq', sample=SAMPLES),
+        expand('DATA/NOTSYN_READS/{sample}_notSyn1.fq', sample=SAMPLES), expand('DATA/NOTSYN_READS/{sample}_notSyn2.fq', sample=SAMPLES),
         expand('DATA/METAPHLAN/{sample}_metaphlan_profile.txt', sample=SAMPLES), expand('DATA/METAPHLAN/{sample}_metaphlan.bowtie2.bz2', sample=SAMPLES),
-        'DATA/METAPHLAN/merged_abundance_table_species.txt','DATA/METAPHLAN/merged_abundance_summary.csv',
+        'DATA/METAPHLAN/merged_abundance_table_species.txt', 'DATA/METAPHLAN/merged_abundance_summary.csv',
         'DATA/METAPHLAN/metaphlan_full_taxonomy.csv',
         'DATA/METAPHLAN/abundance_heatmap_species.png',
-        expand('DATA/HUMANN/{sample}_pathcoverage.tsv', sample=SAMPLES), expand('DATA/HUMANN/{sample}_pathabundance.tsv', sample=SAMPLES),expand('DATA/HUMANN/{sample}_genefamilies.tsv', sample=SAMPLES),
+        expand('DATA/HUMANN/{sample}_pathcoverage.tsv', sample=SAMPLES), expand('DATA/HUMANN/{sample}_pathabundance.tsv', sample=SAMPLES), expand('DATA/HUMANN/{sample}_genefamilies.tsv', sample=SAMPLES),
         'DATA/HUMANN/merged_genefamilies.tsv',
-        'DATA/METAPHLAN/metaphlan_merged_abundance_table.txt','DATA/METAPHLAN/metaphlan_full_taxonomy.csv',
-        'DATA/HUMANN/merged_pathabundance.tsv','DATA/HUMANN/merged_genefamilies_cpm.tsv','DATA/HUMANN/merged_pathcoverage.tsv'
+        'DATA/METAPHLAN/metaphlan_merged_abundance_table.txt', 'DATA/METAPHLAN/metaphlan_full_taxonomy.csv',
+        'DATA/HUMANN/merged_pathabundance.tsv', 'DATA/HUMANN/merged_genefamilies_cpm.tsv', 'DATA/HUMANN/merged_pathcoverage.tsv'
 
 rule clean:
     input:
@@ -45,7 +39,7 @@ rule clean:
         R1='DATA/CLEAN/{sample}_qual_R1.fq.gz',
         R2='DATA/CLEAN/{sample}_qual_R2.fq.gz'
     shell:
-        'mkdir -p DATA/CLEAN &&'
+        'mkdir -p DATA/CLEAN && '
         'bbduk.sh overwrite=true in={input.R1} in2={input.R2} out={output.R1} out2={output.R2} maq=25 2> {log}'
 
 rule remove_syn_ind:
@@ -141,7 +135,7 @@ rule remove_syn_bam:
 
 rule remove_syn_subset:
     input:
-        bam='DATA/UNMAP_BAM{sample}_unmapped.bam'
+        bam='DATA/UNMAP_BAM/{sample}_unmapped.bam'
     conda:'env1.yml'
     log: "LOGS/{sample}_remove_syn_subset.log"
     output:
